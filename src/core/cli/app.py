@@ -1,7 +1,11 @@
 """Atlas-RAG CLI Application (Typer-based)."""
+import warnings
 import typer
 from typing_extensions import Annotated
 
+# Suppress common warnings for better UX
+warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
+warnings.filterwarnings("ignore", message=".*TRANSFORMERS_CACHE.*")
 
 # Create main Typer app
 app = typer.Typer(
