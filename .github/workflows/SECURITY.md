@@ -1,35 +1,35 @@
 # 🔒 Security Tools for AI/ML Projects
 
-Ce projet utilise une **stack de sécurité complète** adaptée aux projets d'IA/ML.
+This project implements an **enterprise-grade security stack** specifically designed for AI/ML applications.
 
 ---
 
-## 📋 Outils de sécurité intégrés
+## 📋 Integrated Security Tools
 
 ### 1. **Secrets Detection** 🔑
 
-**Outils:**
-- **Gitleaks** - Détecte les secrets dans le code (API keys, tokens, passwords)
-- **TruffleHog** - Scan des secrets avec vérification
+**Tools:**
+- **Gitleaks** - Detects secrets in code (API keys, tokens, passwords)
+- **TruffleHog** - Scans for verified secrets
 
-**Détecte:**
-- ✅ API keys OpenAI, Anthropic, HuggingFace
+**Detects:**
+- ✅ OpenAI, Anthropic, HuggingFace API keys
 - ✅ AWS/GCP/Azure credentials
 - ✅ Database passwords
 - ✅ Private keys
-- ✅ Tokens dans l'historique Git
+- ✅ Tokens in Git history
 
-**Quand:** Sur chaque PR
+**When:** On every PR
 
 ---
 
 ### 2. **SAST (Static Application Security Testing)** 🔍
 
-**Outils:**
-- **Bandit** - Security linter Python
-- **Semgrep** - Pattern matching avec règles AI/ML
+**Tools:**
+- **Bandit** - Python security linter
+- **Semgrep** - Pattern matching with AI/ML rules
 
-**Détecte:**
+**Detects:**
 - ✅ SQL injection
 - ✅ Hardcoded secrets
 - ✅ Unsafe deserialization (pickle files)
@@ -37,179 +37,179 @@ Ce projet utilise une **stack de sécurité complète** adaptée aux projets d'I
 - ✅ YAML/JSON injection
 - ✅ Unsafe file operations
 
-**Règles spécifiques IA:**
-- Chargement de modèles non vérifiés
-- Désérialisation de données ML dangereuses
-- Exécution de code dynamique
+**AI-Specific Rules:**
+- Loading unverified models
+- Dangerous ML data deserialization
+- Dynamic code execution
 
-**Quand:** Sur chaque PR
+**When:** On every PR
 
 ---
 
 ### 3. **Dependency Security** 📦
 
-**Outils:**
-- **Safety** - Vérifie les vulnérabilités PyPI
-- **Pip-audit** - Alternative à Safety
-- **Snyk** - Scan des dépendances avec base de données complète
+**Tools:**
+- **Safety** - PyPI vulnerability scanner
+- **Pip-audit** - Alternative dependency checker
+- **Snyk** - Comprehensive CVE database
 
-**Vérifie:**
+**Checks:**
 - ✅ torch, transformers, tensorflow
 - ✅ langchain, openai, anthropic
 - ✅ numpy, scipy, pandas
-- ✅ Toutes les dépendances transitives
+- ✅ All transitive dependencies
 
-**Pourquoi important pour l'IA:**
-- Les librairies ML ont souvent des vulnérabilités critiques
-- Supply chain attacks sur des modèles pré-entraînés
-- Backdoors dans les poids de modèles
+**Why Critical for AI:**
+- ML libraries often have critical vulnerabilities
+- Supply chain attacks on pre-trained models
+- Backdoors in model weights
 
-**Quand:** Sur chaque PR + release
+**When:** On every PR + release
 
 ---
 
 ### 4. **Supply Chain Security** 🔗
 
-**Outils:**
+**Tools:**
 - **Dependency Review** - GitHub native
 - **SBOM Generation** - Software Bill of Materials (CycloneDX)
 
-**Génère:**
-- ✅ Liste complète des dépendances
-- ✅ Versions exactes
-- ✅ Licences
-- ✅ Hashes de vérification
+**Generates:**
+- ✅ Complete dependency list
+- ✅ Exact versions
+- ✅ Licenses
+- ✅ Verification hashes
 
-**Utilité:**
-- Traçabilité complète
-- Audit de conformité
-- Détection de tampering
+**Use Cases:**
+- Full traceability
+- Compliance auditing
+- Tampering detection
 
-**Quand:** Sur chaque PR + release
+**When:** On every PR + release
 
 ---
 
 ### 5. **License Compliance** ⚖️
 
-**Outils:**
-- **pip-licenses** - Extraction des licences
+**Tools:**
+- **pip-licenses** - License extraction
 
-**Vérifie:**
-- ❌ Bloque GPL, AGPL, LGPL (copyleft)
-- ✅ Autorise MIT, Apache, BSD
+**Checks:**
+- ❌ Blocks GPL, AGPL, LGPL (copyleft)
+- ✅ Allows MIT, Apache, BSD
 
-**Pourquoi critique pour l'IA:**
-- Beaucoup de modèles ML ont des licences restrictives
-- HuggingFace models peuvent être non-commerciales
-- Evite les problèmes légaux
+**Why Critical for AI:**
+- Many ML models have restrictive licenses
+- HuggingFace models may be non-commercial
+- Prevents legal issues
 
-**Quand:** Sur chaque PR
+**When:** On every PR
 
 ---
 
 ### 6. **CodeQL (Advanced SAST)** 🧠
 
-**Outil:**
-- **GitHub CodeQL** - Analyse sémantique du code
+**Tool:**
+- **GitHub CodeQL** - Semantic code analysis
 
-**Analyse:**
+**Analyzes:**
 - ✅ Data flow analysis
 - ✅ Taint tracking
 - ✅ Control flow analysis
 - ✅ Security patterns
 
 **Queries:**
-- `security-extended` - Vulnérabilités étendues
-- `security-and-quality` - Qualité + sécurité
+- `security-extended` - Extended vulnerabilities
+- `security-and-quality` - Quality + security
 
-**Quand:** Sur chaque PR
+**When:** On every PR
 
 ---
 
 ### 7. **Trivy (Vulnerability Scanner)** 🛡️
 
-**Outil:**
-- **Aqua Trivy** - Scanner universel
+**Tool:**
+- **Aqua Trivy** - Universal scanner
 
-**Scanne:**
+**Scans:**
 - ✅ Filesystem
-- ✅ Dependencies Python
+- ✅ Python dependencies
 - ✅ OS packages
-- ✅ Containers (si applicable)
+- ✅ Containers (if applicable)
 
-**Sévérité:**
+**Severity:**
 - CRITICAL, HIGH, MEDIUM
 
-**Quand:** Sur chaque PR + release
+**When:** On every PR + release
 
 ---
 
-## 🚨 Cas d'usage spécifiques IA/ML
+## 🚨 AI/ML Specific Use Cases
 
-### Risque 1: Model Poisoning
-**Outil:** Bandit + Semgrep
-**Détecte:** Chargement de modèles non vérifiés
+### Risk 1: Model Poisoning
+**Tool:** Bandit + Semgrep
+**Detects:** Loading unverified models
 ```python
-# ❌ Dangereux
-model = torch.load("model.pth")  # Détecté par Bandit
+# ❌ Dangerous
+model = torch.load("model.pth")  # Detected by Bandit
 
-# ✅ Sûr
+# ✅ Safe
 model = torch.load("model.pth", map_location="cpu", weights_only=True)
 ```
 
-### Risque 2: Data Exfiltration
-**Outil:** Semgrep + CodeQL
-**Détecte:** Envoi de données sensibles
+### Risk 2: Data Exfiltration
+**Tool:** Semgrep + CodeQL
+**Detects:** Sending sensitive data
 ```python
-# ❌ Dangereux - Détecté
+# ❌ Dangerous - Detected
 requests.post(UNKNOWN_URL, data=user_data)
 
-# ✅ Sûr - Whitelisted URLs only
+# ✅ Safe - Whitelisted URLs only
 ```
 
-### Risque 3: Pickle Deserialization
-**Outil:** Bandit
-**Détecte:** Utilisation non sécurisée de pickle
+### Risk 3: Pickle Deserialization
+**Tool:** Bandit
+**Detects:** Unsafe pickle usage
 ```python
-# ❌ Dangereux
+# ❌ Dangerous
 import pickle
-data = pickle.load(file)  # Détecté
+data = pickle.load(file)  # Detected
 
-# ✅ Sûr
+# ✅ Safe
 import json
 data = json.load(file)
 ```
 
-### Risque 4: API Key Leaks
-**Outil:** Gitleaks + TruffleHog
-**Détecte:** Tokens dans le code
+### Risk 4: API Key Leaks
+**Tool:** Gitleaks + TruffleHog
+**Detects:** Tokens in code
 ```python
-# ❌ Dangereux - Détecté immédiatement
+# ❌ Dangerous - Detected immediately
 OPENAI_API_KEY = "sk-proj-abc123..."
 
-# ✅ Sûr
+# ✅ Safe
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ```
 
 ---
 
-## 🔧 Configuration requise
+## 🔧 Required Configuration
 
-### Secrets GitHub (optionnels)
+### GitHub Secrets (Optional)
 
-**SNYK_TOKEN** (recommandé):
-1. Créer compte sur https://snyk.io
-2. Générer token API
-3. Ajouter dans GitHub Secrets
+**SNYK_TOKEN** (recommended):
+1. Create account at https://snyk.io
+2. Generate API token
+3. Add to GitHub Secrets
 
-**Sans token Snyk:**
-Les autres outils fonctionnent sans configuration!
+**Without Snyk token:**
+All other tools work without configuration!
 
 ---
 
-## 📊 Rapports générés
+## 📊 Generated Reports
 
-Chaque PR génère:
+Each PR generates:
 - 📄 Bandit JSON report
 - 📄 Semgrep JSON report
 - 📄 Safety JSON report
@@ -218,74 +218,74 @@ Chaque PR génère:
 - 📄 Licenses JSON/Markdown
 - 📄 Trivy SARIF
 
-**Accès:**
+**Access:**
 GitHub Actions → Artifacts
 
 ---
 
 ## ✅ Best Practices
 
-### Pour les contributeurs:
+### For Contributors:
 
-1. **Avant de commit:**
+1. **Before committing:**
    ```bash
-   # Scan local
+   # Local scan
    gitleaks detect --source .
    bandit -r src/
    ```
 
-2. **Tester les dépendances:**
+2. **Test dependencies:**
    ```bash
    safety check
    pip-audit
    ```
 
-3. **Vérifier les licences:**
+3. **Check licenses:**
    ```bash
    pip-licenses --fail-on="GPL;AGPL"
    ```
 
-### Pour l'admin:
+### For Admin:
 
-1. **Review Security tab** sur GitHub régulièrement
-2. **Vérifier les Dependabot alerts**
-3. **Auditer le SBOM** avant chaque release
-4. **Valider les licences** des nouvelles dépendances
+1. **Review Security tab** on GitHub regularly
+2. **Check Dependabot alerts**
+3. **Audit SBOM** before each release
+4. **Validate licenses** of new dependencies
 
 ---
 
-## 🆘 En cas d'alerte
+## 🆘 Alert Response
 
-### Vulnérabilité CRITICAL trouvée:
+### CRITICAL Vulnerability Found:
 
-1. **Ne pas merger la PR**
-2. **Identifier la dépendance:** Regarder le rapport
-3. **Chercher un patch:**
+1. **Do not merge PR**
+2. **Identify dependency:** Check report
+3. **Find patch:**
    ```bash
    pip install --upgrade <package>
    ```
-4. **Si pas de patch:** Trouver une alternative
+4. **If no patch:** Find alternative
 
-### Secret détecté:
+### Secret Detected:
 
-1. **STOP immédiatement**
-2. **Révoquer le secret** (OpenAI, AWS, etc.)
-3. **Supprimer de l'historique:**
+1. **STOP immediately**
+2. **Revoke secret** (OpenAI, AWS, etc.)
+3. **Remove from history:**
    ```bash
    git filter-branch --force --index-filter \
      'git rm --cached --ignore-unmatch <file>' HEAD
    ```
-4. **Forcer un nouveau secret**
+4. **Force new secret**
 
-### License non-compatible:
+### Incompatible License:
 
-1. **Identifier la dépendance**
-2. **Chercher une alternative** avec licence compatible
-3. **Ou négocier** une licence commerciale
+1. **Identify dependency**
+2. **Find alternative** with compatible license
+3. **Or negotiate** commercial license
 
 ---
 
-## 📚 Ressources
+## 📚 Resources
 
 - [OWASP Top 10 for LLM](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
 - [NIST AI Risk Management Framework](https://www.nist.gov/itl/ai-risk-management-framework)
@@ -294,15 +294,15 @@ GitHub Actions → Artifacts
 
 ---
 
-## 🎯 Résumé
+## 🎯 Summary
 
-| Risque | Outil | Quand |
-|--------|-------|-------|
-| Secrets in code | Gitleaks, TruffleHog | Chaque PR |
-| Code vulnerabilities | Bandit, Semgrep, CodeQL | Chaque PR |
-| Dependency CVEs | Safety, Pip-audit, Snyk | Chaque PR |
-| Supply chain | SBOM, Dependency Review | Chaque PR |
-| License issues | pip-licenses | Chaque PR |
-| Container vulns | Trivy | Chaque PR + Release |
+| Risk | Tool | When |
+|------|------|------|
+| Secrets in code | Gitleaks, TruffleHog | Every PR |
+| Code vulnerabilities | Bandit, Semgrep, CodeQL | Every PR |
+| Dependency CVEs | Safety, Pip-audit, Snyk | Every PR |
+| Supply chain | SBOM, Dependency Review | Every PR |
+| License issues | pip-licenses | Every PR |
+| Container vulns | Trivy | Every PR + Release |
 
-**Résultat:** Stack de sécurité de niveau **entreprise** pour projet IA! 🛡️
+**Result:** Enterprise-grade security stack for AI projects! 🛡️
