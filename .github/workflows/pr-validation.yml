@@ -1,0 +1,170 @@
+name: PR Validation (Contributors)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+
+jobs:
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install ruff black flake8 mypy
+          pip install -e .
+
+      - name: Run Ruff
+        run: ruff check src/
+        continue-on-error: true
+
+      - name: Run Black (check only)
+        run: black --check src/
+        continue-on-error: true
+
+      - name: Run Flake8
+        run: flake8 src/ --max-line-length=120 --extend-ignore=E203,W503
+        continue-on-error: true
+
+  test:
+    name: Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr poppler-utils
+
+      - name: Install system dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install tesseract poppler
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-cov pytest-mock
+          pip install -e .
+
+      - name: Run tests
+        run: |
+          pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=term
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install bandit safety
+          pip install -e .
+
+      - name: Run Bandit (security linter)
+        run: bandit -r src/ -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: Run Safety (check dependencies)
+        run: safety check --json
+        continue-on-error: true
+
+      - name: Run Trivy (vulnerability scanner)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build-test:
+    name: Build Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build tools
+        run: |
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package with twine
+        run: twine check dist/*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: dist/
+
+  summary:
+    name: Validation Summary
+    needs: [lint, test, security, build-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "✅ Lint: ${{ needs.lint.result }}"
+          echo "✅ Tests: ${{ needs.test.result }}"
+          echo "✅ Security: ${{ needs.security.result }}"
+          echo "✅ Build: ${{ needs.build-test.result }}"
+
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.security.result }}" != "success" ] || \
+             [ "${{ needs.build-test.result }}" != "success" ]; then
+            echo "❌ Some checks failed"
+            exit 1
+          fi
+          echo "✅ All checks passed!"

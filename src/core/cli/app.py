@@ -75,11 +75,11 @@ def main(
 
     \b
     Documentation:
-        https://github.com/horiz-data/atlas-rag
+        https://github.com/horiz-data/ragstudio
 
     \b
     Support:
-        Report issues at: https://github.com/horiz-data/atlas-rag/issues
+        Report issues at: https://github.com/horiz-data/ragstudio/issues
     """
     pass
 
