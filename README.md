@@ -1,21 +1,22 @@
-# 🚀 Atlas-RAG
+# 🚀 RAG Studio
 
 **Production-ready document processing CLI for RAG applications**
 
-Process documents, extract text with advanced OCR, chunk intelligently, and prepare data for RAG systems - all from the command line.
+Process documents, extract text with advanced OCR, chunk intelligently, and prepare data for RAG systems - all from the command line with `ragctl`.
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/horiz-data/atlas-rag)
-[![Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/horiz-data/atlas-rag)
-[![Tests](https://img.shields.io/badge/tests-129%20passed-success.svg)](https://github.com/horiz-data/atlas-rag)
-[![Coverage](https://img.shields.io/badge/coverage-96%25-success.svg)](https://github.com/horiz-data/atlas-rag)
+[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/horiz-data/ragstudio)
+[![PyPI](https://img.shields.io/badge/pypi-ragctl-blue.svg)](https://pypi.org/project/ragctl/)
+[![Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/horiz-data/ragstudio)
+[![Tests](https://img.shields.io/badge/tests-129%20passed-success.svg)](https://github.com/horiz-data/ragstudio)
+[![Coverage](https://img.shields.io/badge/coverage-96%25-success.svg)](https://github.com/horiz-data/ragstudio)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
 ---
 
-## 🎯 What is Atlas-RAG?
+## 🎯 What is RAG Studio?
 
-Atlas-RAG is a **command-line tool** for processing documents into chunks ready for Retrieval-Augmented Generation (RAG) systems. It handles the dirty work of document ingestion, OCR, and intelligent chunking so you can focus on building your RAG application.
+RAG Studio (`ragctl`) is a **command-line tool** for processing documents into chunks ready for Retrieval-Augmented Generation (RAG) systems. It handles the dirty work of document ingestion, OCR, and intelligent chunking so you can focus on building your RAG application.
 
 **Key capabilities:**
 - 📄 Universal document loading (PDF, DOCX, images, HTML, Markdown, etc.)
@@ -55,7 +56,7 @@ Atlas-RAG is a **command-line tool** for processing documents into chunks ready 
   - `auto-stop` - Stop on first error (validation mode)
   - `auto-skip` - Skip failed files automatically
 - **Complete history**: Every run saved to `~/.atlasrag/history/`
-- **Retry capability**: `atlas-rag retry` to rerun failed files only
+- **Retry capability**: `ragctl retry` to rerun failed files only
 - **Per-file output**: One chunk file per document for better traceability
 
 ### 💾 Flexible Export & Storage
@@ -74,32 +75,44 @@ Atlas-RAG is a **command-line tool** for processing documents into chunks ready 
 
 ### Installation
 
+#### From PyPI (Recommended)
+
+```bash
+# Install from PyPI
+pip install ragctl
+
+# Verify installation
+ragctl --version
+```
+
+#### From Source
+
 ```bash
 # Clone repository
-git clone git@github.com:horiz-data/atlas-rag.git
-cd atlas-rag
+git clone git@github.com:horiz-data/ragstudio.git
+cd ragstudio
 
 # Install with pip
 pip install -e .
 
 # Verify installation
-atlas-rag --version
+ragctl --version
 ```
 
 ### Basic Usage
 
 ```bash
 # Process a single document
-atlas-rag chunk document.pdf --show
+ragctl chunk document.pdf --show
 
 # Process with advanced OCR for scanned documents
-atlas-rag chunk scanned.pdf --advanced-ocr -o chunks.json
+ragctl chunk scanned.pdf --advanced-ocr -o chunks.json
 
 # Batch process a folder
-atlas-rag batch ./documents --output ./chunks/
+ragctl batch ./documents --output ./chunks/
 
 # Batch with auto-retry for CI/CD
-atlas-rag batch ./documents --output ./chunks/ --auto-continue
+ragctl batch ./documents --output ./chunks/ --auto-continue
 ```
 
 ---
@@ -110,16 +123,16 @@ atlas-rag batch ./documents --output ./chunks/ --auto-continue
 
 ```bash
 # Simple text file
-atlas-rag chunk document.txt --show
+ragctl chunk document.txt --show
 
 # PDF with semantic chunking (default)
-atlas-rag chunk report.pdf -o report_chunks.json
+ragctl chunk report.pdf -o report_chunks.json
 
 # Scanned image with OCR
-atlas-rag chunk contract.jpeg --advanced-ocr --show
+ragctl chunk contract.jpeg --advanced-ocr --show
 
 # Custom chunking parameters
-atlas-rag chunk document.pdf \
+ragctl chunk document.pdf \
   --strategy semantic \
   --max-tokens 500 \
   --overlap 100 \
@@ -130,16 +143,16 @@ atlas-rag chunk document.pdf \
 
 ```bash
 # Process all files in a directory
-atlas-rag batch ./documents --output ./chunks/
+ragctl batch ./documents --output ./chunks/
 
 # Process only PDFs recursively
-atlas-rag batch ./documents \
+ragctl batch ./documents \
   --pattern "*.pdf" \
   --recursive \
   --output ./chunks/
 
 # CI/CD mode - continue on errors
-atlas-rag batch ./documents \
+ragctl batch ./documents \
   --output ./chunks/ \
   --auto-continue \
   --save-history
@@ -151,7 +164,7 @@ atlas-rag batch ./documents \
 # └── doc3_chunks.jsonl  (18 chunks)
 
 # Single-file output (all chunks combined):
-atlas-rag batch ./documents \
+ragctl batch ./documents \
   --output ./all_chunks.jsonl \
   --single-file
 ```
@@ -160,37 +173,37 @@ atlas-rag batch ./documents \
 
 ```bash
 # Show last failed run
-atlas-rag retry --show
+ragctl retry --show
 
 # Retry all failed files from last run
-atlas-rag retry
+ragctl retry
 
 # Retry specific run by ID
-atlas-rag retry run_20251028_133403
+ragctl retry run_20251028_133403
 ```
 
 ### Vector Store Integration
 
 ```bash
 # Ingest chunks into Qdrant
-atlas-rag ingest chunks.jsonl \
+ragctl ingest chunks.jsonl \
   --collection my-docs \
   --url http://localhost:6333
 
 # Get system info
-atlas-rag info
+ragctl info
 ```
 
 ### Evaluate Chunking Quality
 
 ```bash
 # Evaluate chunking strategy
-atlas-rag eval document.pdf \
+ragctl eval document.pdf \
   --strategies semantic sentence token \
   --metrics coverage overlap coherence
 
 # Compare strategies with visualization
-atlas-rag eval document.pdf --compare --output eval_results.json
+ragctl eval document.pdf --compare --output eval_results.json
 ```
 
 ---
@@ -243,8 +256,8 @@ make test
 make test-cli
 
 # Quick validation
-atlas-rag --version
-atlas-rag chunk tests/data/sample.txt --show
+ragctl --version
+ragctl chunk tests/data/sample.txt --show
 ```
 
 **Test Coverage**: 129 tests, 96% coverage
@@ -269,14 +282,14 @@ atlas-rag chunk tests/data/sample.txt --show
 
 | Command | Description |
 |---------|-------------|
-| `atlas-rag chunk` | Process a single document |
-| `atlas-rag batch` | Batch process multiple files |
-| `atlas-rag retry` | Retry failed files from history |
-| `atlas-rag ingest` | Ingest chunks into Qdrant |
-| `atlas-rag eval` | Evaluate chunking quality |
-| `atlas-rag info` | System information |
+| `ragctl chunk` | Process a single document |
+| `ragctl batch` | Batch process multiple files |
+| `ragctl retry` | Retry failed files from history |
+| `ragctl ingest` | Ingest chunks into Qdrant |
+| `ragctl eval` | Evaluate chunking quality |
+| `ragctl info` | System information |
 
-Run `atlas-rag COMMAND --help` for detailed options.
+Run `ragctl COMMAND --help` for detailed options.
 
 ---
 
@@ -358,8 +371,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines (coming soon).
 ## 📧 Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/horiz-data/atlas-rag/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/horiz-data/atlas-rag/discussions)
+- **Issues**: [GitHub Issues](https://github.com/horiz-data/ragstudio/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/horiz-data/ragstudio/discussions)
 
 ---
 
@@ -375,4 +388,4 @@ Built with:
 
 ---
 
-**Version**: 0.1.0 | **Status**: Beta | **License**: MIT
+**Version**: 0.1.2 | **Status**: Beta | **License**: MIT

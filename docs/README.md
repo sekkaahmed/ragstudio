@@ -1,6 +1,6 @@
-# Atlas-RAG Documentation
+# RAG Studio Documentation
 
-Welcome to the Atlas-RAG documentation!
+Welcome to the RAG Studio (`ragctl`) documentation!
 
 ## 📚 Table of Contents
 
@@ -40,11 +40,11 @@ Welcome to the Atlas-RAG documentation!
 
 ## 🆘 Need Help?
 
-- **Questions**: Open a [GitHub Discussion](https://github.com/horiz-data/atlas-rag/discussions)
-- **Bugs**: Create a [GitHub Issue](https://github.com/horiz-data/atlas-rag/issues)
+- **Questions**: Open a [GitHub Discussion](https://github.com/horiz-data/ragstudio/discussions)
+- **Bugs**: Create a [GitHub Issue](https://github.com/horiz-data/ragstudio/issues)
 - **Contributions**: See [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ---
 
-**Last Updated:** October 28, 2024
-**Version:** 0.1.0
+**Last Updated:** October 29, 2025
+**Version:** 0.1.2

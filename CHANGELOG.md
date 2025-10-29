@@ -1,9 +1,81 @@
 # Changelog
 
-All notable changes to Atlas-RAG will be documented in this file.
+All notable changes to RAG Studio will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.2] - 2025-10-29
+
+### 🎨 Rebranding
+
+**RAG Studio** - Professional rebrand with improved naming:
+- **Project name**: Atlas-RAG → **RAG Studio**
+- **Package name**: atlas-rag → **ragctl** (follows kubectl/systemctl convention)
+- **CLI command**: `atlas-rag` → `ragctl`
+- **Repository**: horiz-data/atlas-rag → horiz-data/ragstudio
+
+### ⚡ Performance Improvements
+
+**CLI Startup Optimization** - 100x faster:
+- Implemented lazy imports for heavy modules (torch, transformers, langchain)
+- Startup time: 5-10s → 0.08s
+- `ragctl --version` now instant
+- Commands load dependencies only when needed
+
+### ✨ New Features
+
+**User Experience**:
+- Suppressed transformers FutureWarning for cleaner output
+- Updated all help text and branding to RAG Studio
+- Improved version display format
+
+### 🔒 Security & CI/CD
+
+**Comprehensive AI/ML Security Pipeline**:
+- Added 12 security tools across 10 jobs
+- **Secrets detection**: Gitleaks, TruffleHog (AI API keys: OpenAI, Anthropic, HuggingFace)
+- **SAST**: Bandit, Semgrep (AI/ML-specific patterns)
+- **Dependencies**: Safety, Pip-audit, Snyk
+- **Supply chain**: SBOM generation (CycloneDX), Dependency Review
+- **License compliance**: pip-licenses (GPL/AGPL blocking)
+- **Vulnerabilities**: Trivy, CodeQL
+
+**CI/CD Workflows**:
+- `pr-validation.yml`: Security validation for contributors (no deployment)
+- `release-deploy.yml`: Admin-only PyPI deployment with Trusted Publisher
+- `.gitleaks.toml`: Custom AI/ML API key detection patterns
+- `SECURITY.md`: Complete security documentation
+
+### 📝 Documentation
+
+- Updated all documentation to RAG Studio branding
+- Updated all CLI examples to use `ragctl` command
+- Added PyPI installation instructions
+- All GitHub URLs updated to ragstudio repository
+- Updated version references to 0.1.2
+
+### 🔧 Migration Guide
+
+If you installed version 0.1.0 or 0.1.1:
+
+```bash
+# Uninstall old package
+pip uninstall atlas-rag
+
+# Install new package
+pip install ragctl
+
+# Update your commands
+atlas-rag → ragctl
+```
+
+**Breaking changes**:
+- CLI command changed from `atlas-rag` to `ragctl`
+- Package name changed from `atlas-rag` to `ragctl`
+- Configuration directory remains `~/.atlasrag/` (no change)
+
+---
 
 ## [0.1.0] - 2025-01-28
 
@@ -205,7 +277,7 @@ First open-source release of Atlas-RAG - A production-ready document processing 
 
 ## Future Plans
 
-See [GitHub Issues](https://github.com/horiz-data/atlas-rag/issues) for planned features and enhancements.
+See [GitHub Issues](https://github.com/horiz-data/ragstudio/issues) for planned features and enhancements.
 
 Potential improvements:
 - Parallel batch processing
