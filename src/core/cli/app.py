@@ -2,19 +2,11 @@
 import typer
 from typing_extensions import Annotated
 
-from src.core.cli.commands.chunk import chunk_command
-from src.core.cli.commands.batch import batch_command
-from src.core.cli.commands.search import search_command
-from src.core.cli.commands.info import info_command
-from src.core.cli.commands.ingest import ingest_command
-from src.core.cli.commands.eval import eval_command
-from src.core.cli.commands.retry import retry_command
-
 
 # Create main Typer app
 app = typer.Typer(
-    name="atlas-rag",
-    help="Atlas-RAG CLI - Production-ready document processing for RAG applications",
+    name="ragctl",
+    help="ragctl - Production-ready document processing for RAG applications",
     add_completion=True,
     no_args_is_help=True,
     rich_markup_mode="rich",
@@ -26,12 +18,20 @@ def version_callback(value: bool):
     if value:
         from importlib.metadata import version, PackageNotFoundError
         try:
-            app_version = version("atlas-rag")
+            app_version = version("ragctl")
         except PackageNotFoundError:
-            app_version = "0.1.0 (dev)"
+            try:
+                # Fallback to old name for development
+                app_version = version("atlas-rag")
+            except PackageNotFoundError:
+                app_version = "0.1.0 (dev)"
 
-        typer.echo(f"Atlas-RAG CLI version {app_version}")
+        typer.echo(f"ragctl version {app_version}")
         raise typer.Exit()
+
+
+# Lazy import - commands are imported only when actually used
+# This makes --version and --help instant instead of loading all heavy dependencies
 
 
 @app.callback()
@@ -47,27 +47,27 @@ def main(
     ] = False,
 ):
     """
-    Atlas-RAG CLI - Document processing and semantic search.
+    ragctl - Production-ready document processing for RAG applications.
 
-    A production-ready pipeline for chunking documents and building
-    RAG (Retrieval-Augmented Generation) applications.
+    A command-line tool for chunking documents and building
+    RAG (Retrieval-Augmented Generation) systems.
 
     \b
     Quick Start:
         1. Chunk a document:
-           $ atlas-rag chunk document.txt --show
+           $ ragctl chunk document.txt --show
 
         2. Process multiple files:
-           $ atlas-rag batch ./documents -o chunks.json
+           $ ragctl batch ./documents -o chunks.json
 
         3. Ingest to vector store:
-           $ atlas-rag ingest chunks.json
+           $ ragctl ingest chunks.json
 
         4. Evaluate chunking quality:
-           $ atlas-rag eval chunks.json
+           $ ragctl eval chunks.json
 
         5. System info:
-           $ atlas-rag info
+           $ ragctl info
 
     \b
     Documentation:
@@ -80,14 +80,84 @@ def main(
     pass
 
 
-# Register commands
-app.command(name="chunk", help="Chunk a single document")(chunk_command)
-app.command(name="batch", help="Process multiple files in batch mode")(batch_command)
-app.command(name="ingest", help="Ingest chunks into Qdrant vector store")(ingest_command)
-app.command(name="search", help="Search in vector store using semantic search", hidden=True)(search_command)
-app.command(name="eval", help="Evaluate chunking quality and compare strategies")(eval_command)
-app.command(name="info", help="Display system information and status")(info_command)
-app.command(name="retry", help="Retry failed files from a previous run")(retry_command)
+# Register commands - imports happen inside each command function (lazy loading)
+@app.command(name="chunk", help="Chunk a single document")
+def chunk(
+    input_file: str = typer.Argument(..., help="Input file to chunk"),
+    output: str = typer.Option(None, "--output", "-o", help="Output file path"),
+    strategy: str = typer.Option("semantic", "--strategy", "-s", help="Chunking strategy"),
+    max_tokens: int = typer.Option(400, "--max-tokens", help="Maximum tokens per chunk"),
+    overlap: int = typer.Option(50, "--overlap", help="Overlap between chunks"),
+    show: bool = typer.Option(False, "--show", help="Display chunks in terminal"),
+    advanced_ocr: bool = typer.Option(False, "--advanced-ocr", help="Use advanced OCR"),
+):
+    """Chunk a single document."""
+    from src.core.cli.commands.chunk import chunk_command
+    return chunk_command(input_file, output, strategy, max_tokens, overlap, show, advanced_ocr)
+
+
+@app.command(name="batch", help="Process multiple files in batch mode")
+def batch(
+    input_dir: str = typer.Argument(..., help="Input directory with files"),
+    output: str = typer.Option(None, "--output", "-o", help="Output directory or file"),
+    pattern: str = typer.Option("*", "--pattern", "-p", help="File pattern to match"),
+    recursive: bool = typer.Option(False, "--recursive", "-r", help="Process recursively"),
+    auto_continue: bool = typer.Option(False, "--auto-continue", help="Continue on errors"),
+):
+    """Process multiple files in batch mode."""
+    from src.core.cli.commands.batch import batch_command
+    return batch_command(input_dir, output, pattern, recursive, auto_continue)
+
+
+@app.command(name="ingest", help="Ingest chunks into Qdrant vector store")
+def ingest(
+    input_file: str = typer.Argument(..., help="Input JSON/JSONL file with chunks"),
+    collection: str = typer.Option("documents", "--collection", "-c", help="Collection name"),
+    url: str = typer.Option("http://localhost:6333", "--url", help="Qdrant URL"),
+):
+    """Ingest chunks into Qdrant vector store."""
+    from src.core.cli.commands.ingest import ingest_command
+    return ingest_command(input_file, collection, url)
+
+
+@app.command(name="search", help="Search in vector store using semantic search", hidden=True)
+def search(
+    query: str = typer.Argument(..., help="Search query"),
+    collection: str = typer.Option("documents", "--collection", "-c", help="Collection name"),
+    limit: int = typer.Option(5, "--limit", "-l", help="Number of results"),
+):
+    """Search in vector store using semantic search."""
+    from src.core.cli.commands.search import search_command
+    return search_command(query, collection, limit)
+
+
+@app.command(name="eval", help="Evaluate chunking quality and compare strategies")
+def eval(
+    input_file: str = typer.Argument(..., help="Input file to evaluate"),
+    strategies: str = typer.Option("semantic,sentence,token", "--strategies", help="Strategies to compare"),
+):
+    """Evaluate chunking quality and compare strategies."""
+    from src.core.cli.commands.eval import eval_command
+    return eval_command(input_file, strategies)
+
+
+@app.command(name="info", help="Display system information and status")
+def info(
+    api_url: str = typer.Option("http://localhost:8000", "--api-url", help="API server URL"),
+):
+    """Display system information and status."""
+    from src.core.cli.commands.info import info_command
+    return info_command(api_url)
+
+
+@app.command(name="retry", help="Retry failed files from a previous run")
+def retry(
+    run_id: str = typer.Argument(None, help="Run ID to retry (optional)"),
+    show: bool = typer.Option(False, "--show", help="Show failed runs"),
+):
+    """Retry failed files from a previous run."""
+    from src.core.cli.commands.retry import retry_command
+    return retry_command(run_id, show)
 
 
 if __name__ == "__main__":
