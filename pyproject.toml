@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ragctl"
 version = "0.1.2"
-description = "Intelligent RAG system with advanced OCR, semantic chunking, and production-ready batch processing CLI"
+description = "RAG Studio - Production-ready RAG toolkit with advanced OCR, semantic chunking, and intelligent document processing"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 license = {text = "MIT"}

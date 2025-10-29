@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", message=".*TRANSFORMERS_CACHE.*")
 # Create main Typer app
 app = typer.Typer(
     name="ragctl",
-    help="ragctl - Production-ready document processing for RAG applications",
+    help="RAG Studio - Production-ready RAG toolkit with intelligent document processing",
     add_completion=True,
     no_args_is_help=True,
     rich_markup_mode="rich",
@@ -30,7 +30,7 @@ def version_callback(value: bool):
             except PackageNotFoundError:
                 app_version = "0.1.0 (dev)"
 
-        typer.echo(f"ragctl version {app_version}")
+        typer.echo(f"RAG Studio (ragctl) version {app_version}")
         raise typer.Exit()
 
 
@@ -51,10 +51,10 @@ def main(
     ] = False,
 ):
     """
-    ragctl - Production-ready document processing for RAG applications.
+    RAG Studio - Production-ready RAG toolkit with intelligent document processing.
 
-    A command-line tool for chunking documents and building
-    RAG (Retrieval-Augmented Generation) systems.
+    A comprehensive CLI for building RAG (Retrieval-Augmented Generation) systems
+    with advanced OCR, semantic chunking, and vector store integration.
 
     \b
     Quick Start:

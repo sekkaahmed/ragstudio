@@ -29,12 +29,12 @@ def info_command(
     \b
     Examples:
         # Display system info
-        atlas-rag info
+        ragctl info
 
         # Check custom API URL
-        atlas-rag info --api-url http://192.168.1.100:8000
+        ragctl info --api-url http://192.168.1.100:8000
     """
-    console.print("\n[bold]Atlas-RAG System Information[/bold]\n")
+    console.print("\n[bold]RAG Studio System Information[/bold]\n")
 
     # Check API health
     api_available = False
@@ -88,9 +88,9 @@ def info_command(
 
     # CLI commands available
     console.print(f"\n[bold]Available Commands:[/bold]")
-    console.print("  [cyan]atlas-rag chunk[/cyan]   - Chunk a single document")
-    console.print("  [cyan]atlas-rag batch[/cyan]   - Process multiple files")
-    console.print("  [cyan]atlas-rag search[/cyan]  - Semantic search (requires API)")
-    console.print("  [cyan]atlas-rag info[/cyan]    - Display this information")
+    console.print("  [cyan]ragctl chunk[/cyan]   - Chunk a single document")
+    console.print("  [cyan]ragctl batch[/cyan]   - Process multiple files")
+    console.print("  [cyan]ragctl search[/cyan]  - Semantic search (requires API)")
+    console.print("  [cyan]ragctl info[/cyan]    - Display this information")
 
-    console.print(f"\n[dim]Run 'atlas-rag --help' for more information[/dim]\n")
+    console.print(f"\n[dim]Run 'ragctl --help' for more information[/dim]\n")
