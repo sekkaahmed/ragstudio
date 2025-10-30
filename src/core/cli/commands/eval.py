@@ -64,18 +64,18 @@ def eval_command(
     \b
     Examples:
         # Evaluate single chunking result
-        atlas-rag eval chunks.json
+        ragctl eval chunks.json
 
         # Compare multiple strategies
-        atlas-rag eval semantic.json sentence.json token.json --compare
+        ragctl eval semantic.json sentence.json token.json --compare
 
         # Save detailed report
-        atlas-rag eval chunks.json --report eval_report.json --details
+        ragctl eval chunks.json --report eval_report.json --details
 
         # Pipeline: chunk with different strategies → evaluate
-        atlas-rag chunk doc.txt --strategy semantic -o semantic.json
-        atlas-rag chunk doc.txt --strategy sentence -o sentence.json
-        atlas-rag eval semantic.json sentence.json --compare
+        ragctl chunk doc.txt --strategy semantic -o semantic.json
+        ragctl chunk doc.txt --strategy sentence -o sentence.json
+        ragctl eval semantic.json sentence.json --compare
     """
     console.print(f"\n[bold]Evaluating chunking quality...[/bold]\n")
 

@@ -109,9 +109,9 @@ class NougatOCRProcessor:
             else:
                 self.device = self.config.device
             
-            # Load processor and model
-            self.processor = NougatProcessor.from_pretrained(self.config.model_name)
-            self.model = VisionEncoderDecoderModel.from_pretrained(self.config.model_name)
+            # Load processor and model (model name from config, user-controlled)
+            self.processor = NougatProcessor.from_pretrained(self.config.model_name)  # nosec B615
+            self.model = VisionEncoderDecoderModel.from_pretrained(self.config.model_name)  # nosec B615
             self.model.to(self.device)
             
             self.logger.info("Nougat model loaded successfully")

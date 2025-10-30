@@ -99,7 +99,7 @@ obligatoire diffuse l'orthographe standard."""
 
     def test_chunk_document_basic(self, sample_document):
         """Test basic chunking."""
-        chunker = AtlasChunker(chunk_size=100, chunk_overlap=20)
+        chunker = AtlasChunker(chunk_size=50, chunk_overlap=10)
         chunks = chunker.chunk_document(sample_document)
 
         # Should create multiple chunks

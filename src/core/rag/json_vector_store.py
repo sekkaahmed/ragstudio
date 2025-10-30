@@ -36,8 +36,6 @@ except ImportError:
     from langchain.schema import Document
     from langchain.vectorstores.base import VectorStore
 
-from langchain.docstore.document import Document as LangChainDocument
-
 LOGGER = logging.getLogger(__name__)
 
 

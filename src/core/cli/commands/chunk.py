@@ -32,7 +32,7 @@ class ChunkStrategy(str, Enum):
     """Available chunking strategies."""
     semantic = "semantic"
     sentence = "sentence"
-    token = "token"
+    token = "token"  # nosec B105 - Strategy name, not a password
 
 
 def _display_routing_decisions(result: Dict[str, Any]) -> None:
@@ -207,7 +207,7 @@ def _generate_processing_summary(
         "results": {
             "chunks": {
                 "total_count": len(chunks),
-                "average_size_chars": sum(len(c.text) for c in chunks) // len(chunks) if chunks else 0,
+                "average_size_chars": (sum(len(c.text) for c in chunks) // len(chunks)) if len(chunks) > 0 else 0,
                 "min_size_chars": min((len(c.text) for c in chunks), default=0),
                 "max_size_chars": max((len(c.text) for c in chunks), default=0),
                 "total_text_length": sum(len(c.text) for c in chunks)
@@ -456,16 +456,16 @@ def chunk_command(
     \b
     Examples:
         # Basic chunking with semantic strategy
-        atlas-rag chunk document.txt
+        ragctl chunk document.txt
 
         # Chunk with specific parameters
-        atlas-rag chunk document.txt --strategy token --max-tokens 512
+        ragctl chunk document.txt --strategy token --max-tokens 512
 
         # Chunk and save to JSON
-        atlas-rag chunk document.txt -o chunks.json
+        ragctl chunk document.txt -o chunks.json
 
         # Chunk and display results
-        atlas-rag chunk document.txt --show --limit 5
+        ragctl chunk document.txt --show --limit 5
     """
     # === SECURITY VALIDATIONS ===
     security_config = get_security_config()
@@ -667,6 +667,12 @@ def chunk_command(
 
     # Update processing data with text length
     processing_data["text_length"] = len(text)
+
+    # Handle empty files
+    if not text or len(text.strip()) == 0:
+        from src.core.cli.utils.display import print_warning
+        print_warning(f"Empty file: {file.name} contains no text")
+        return 0
 
     # Handle auto strategy selection
     if config.chunking.strategy == "auto":

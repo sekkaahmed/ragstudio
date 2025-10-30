@@ -154,28 +154,28 @@ def batch_command(
     \b
     Examples:
         # Process all .txt files in a directory (interactive mode)
-        atlas-rag batch ./documents
+        ragctl batch ./documents
 
         # Process all markdown files recursively
-        atlas-rag batch ./docs --pattern "*.md" --recursive
+        ragctl batch ./docs --pattern "*.md" --recursive
 
         # Process and save chunks (one file per document)
-        atlas-rag batch ./data --pattern "*.txt" -o ./output
+        ragctl batch ./data --pattern "*.txt" -o ./output
 
         # Process and save all chunks in a single file
-        atlas-rag batch ./data --pattern "*.txt" -o all_chunks.jsonl --single-file
+        ragctl batch ./data --pattern "*.txt" -o all_chunks.jsonl --single-file
 
         # Process with custom chunking parameters
-        atlas-rag batch ./docs --strategy sentence --max-tokens 300
+        ragctl batch ./docs --strategy sentence --max-tokens 300
 
         # Auto-continue on errors (for CI/CD)
-        atlas-rag batch ./docs --auto-continue
+        ragctl batch ./docs --auto-continue
 
         # Stop on first error (for validation)
-        atlas-rag batch ./docs --auto-stop
+        ragctl batch ./docs --auto-stop
 
         # Skip failed files automatically (for large batches)
-        atlas-rag batch ./docs --auto-skip
+        ragctl batch ./docs --auto-skip
     """
     # === SECURITY VALIDATIONS ===
     security_config = get_security_config()
@@ -285,7 +285,7 @@ def batch_command(
     )
 
     # Display header
-    console.print(f"\n[bold cyan]📊 Atlas-RAG - Batch Processing[/bold cyan]")
+    console.print(f"\n[bold cyan]📊 ragctl - Batch Processing[/bold cyan]")
     console.print("[bold]═══════════════════════════════════════[/bold]")
     console.print(f"Files to process: {len(files)}")
     console.print(f"Pattern:          {pattern}")
@@ -611,7 +611,7 @@ def batch_command(
         if failed_count > 0 or skipped_count > 0:
             console.print()
             console.print("[bold]💡 To retry failed/skipped files:[/bold]")
-            console.print(f"   atlas-rag retry {run.run_id}")
+            console.print(f"   ragctl retry {run.run_id}")
 
     console.print()
 

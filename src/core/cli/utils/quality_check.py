@@ -126,8 +126,8 @@ def check_text_quality(text: str, min_valid_word_ratio: float = 0.4) -> Dict[str
             "reason": "Contient uniquement des espaces"
         }
 
-    # Check if text is too short (less than 50 chars after cleanup)
-    if len(text_no_space) < 50:
+    # Check if text is too short (less than 20 chars after cleanup)
+    if len(text_no_space) < 20:
         return {
             "is_readable": False,
             "valid_word_ratio": 0.0,

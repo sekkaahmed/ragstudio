@@ -73,6 +73,13 @@ def ingest_command(
             max=1000
         )
     ] = 32,
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "--yes", "-y",
+            help="Skip confirmation prompts (auto-confirm)"
+        )
+    ] = False,
 ) -> None:
     """
     Ingest chunks into Qdrant vector store.
@@ -91,20 +98,20 @@ def ingest_command(
     \b
     Examples:
         # Basic ingestion
-        atlas-rag ingest chunks.json
+        ragctl ingest chunks.json
 
         # Custom collection
-        atlas-rag ingest chunks.json --collection my_docs
+        ragctl ingest chunks.json --collection my_docs
 
         # Recreate collection (⚠️ deletes existing data)
-        atlas-rag ingest chunks.json --collection my_docs --recreate
+        ragctl ingest chunks.json --collection my_docs --recreate
 
         # Custom Qdrant URL
-        atlas-rag ingest chunks.json --qdrant-url http://192.168.1.100:6333
+        ragctl ingest chunks.json --qdrant-url http://192.168.1.100:6333
 
         # Pipeline: chunk → ingest
-        atlas-rag chunk doc.txt -o /tmp/chunks.json && \\
-        atlas-rag ingest /tmp/chunks.json
+        ragctl chunk doc.txt -o /tmp/chunks.json && \\
+        ragctl ingest /tmp/chunks.json
     """
     # === SECURITY VALIDATIONS ===
     security_config = get_security_config()
@@ -136,8 +143,11 @@ def ingest_command(
         with console.status("[bold green]Reading JSON..."):
             chunks_data = json.loads(chunks_file.read_text())
 
-        if not isinstance(chunks_data, list):
-            print_error("Invalid JSON format: expected array of chunks")
+        # Support both formats: [...] and {"chunks": [...]}
+        if isinstance(chunks_data, dict) and "chunks" in chunks_data:
+            chunks_data = chunks_data["chunks"]
+        elif not isinstance(chunks_data, list):
+            print_error("Invalid JSON format: expected array of chunks or {\"chunks\": [...]}")
             raise typer.Exit(code=1)
 
         if len(chunks_data) == 0:
@@ -204,8 +214,8 @@ def ingest_command(
         if recreate:
             print_warning(f"Recreating collection '{collection}' (existing data will be deleted)")
 
-            # Ask for confirmation in interactive mode
-            if not typer.confirm("⚠️  Are you sure you want to delete existing data?"):
+            # Ask for confirmation in interactive mode (unless --yes flag is used)
+            if not yes and not typer.confirm("⚠️  Are you sure you want to delete existing data?"):
                 print_info("Operation cancelled")
                 raise typer.Exit(code=0)
 
@@ -270,7 +280,8 @@ def ingest_command(
             console.print(f"\n[bold]Collection status:[/bold]")
             console.print(f"  Vectors in collection: {info.get('vectors_count', 'N/A'):,}")
             console.print(f"  Collection status: [green]{info.get('status', 'unknown')}[/green]")
-        except:
+        except Exception:  # nosec B110 - Collection info is optional, safe to skip
+            # Collection info is optional, silently skip if not available
             pass
 
     except KeyboardInterrupt:
@@ -285,4 +296,4 @@ def ingest_command(
 
     # Success message
     console.print(f"\n[bold green]✓ Ready for search![/bold green]")
-    console.print(f"  Try: [cyan]atlas-rag search \"your query\" --collection {collection}[/cyan]\n")
+    console.print(f"  Try: [cyan]ragctl search \"your query\" --collection {collection}[/cyan]\n")

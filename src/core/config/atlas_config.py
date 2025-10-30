@@ -78,7 +78,7 @@ class LLMConfig:
         local_indicators = [
             "localhost",
             "127.0.0.1",
-            "0.0.0.0",
+            "0.0.0.0",  # nosec B104 - String literal for IP detection, not binding
             "192.168.",
             "10.",
             "172.16.",

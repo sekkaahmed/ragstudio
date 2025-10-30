@@ -93,7 +93,7 @@ def calculate_delay(
     # Add jitter if enabled (random 0-10% variation)
     if config.jitter:
         import random
-        jitter_factor = 1.0 + (random.random() * 0.1 - 0.05)  # 0.95 to 1.05
+        jitter_factor = 1.0 + (random.random() * 0.1 - 0.05)  # nosec B311 - Jitter for retry backoff, not crypto
         delay *= jitter_factor
 
     return delay

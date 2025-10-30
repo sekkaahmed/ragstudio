@@ -62,21 +62,21 @@ def retry_command(
     \b
     Examples:
         # Retry last failed run
-        atlas-rag retry
+        ragctl retry
 
         # Retry specific run
-        atlas-rag retry run_20251028_223532
+        ragctl retry run_20251028_223532
 
         # Show what would be retried (dry run)
-        atlas-rag retry --show
+        ragctl retry --show
 
         # Retry with auto-continue mode
-        atlas-rag retry --mode auto-continue
+        ragctl retry --mode auto-continue
 
         # Retry to specific output
-        atlas-rag retry -o ./output_retry/
+        ragctl retry -o ./output_retry/
     """
-    console.print("[bold cyan]🔄 Atlas-RAG Retry Command[/bold cyan]")
+    console.print("[bold cyan]🔄 ragctl Retry Command[/bold cyan]")
     console.print()
 
     # Get history manager
@@ -88,10 +88,17 @@ def retry_command(
         run = history.get_last_failed_run()
 
         if not run:
-            print_error("No failed runs found in history")
-            console.print()
-            console.print("[dim]Tip: Use 'atlas-rag history list' to see all runs[/dim]")
-            raise typer.Exit(1)
+            if show:
+                # In show mode, no failed runs is success, not an error
+                print_info("No failed runs found in history - all runs succeeded!")
+                console.print()
+                console.print("[dim]✓ No files need to be retried[/dim]")
+                raise typer.Exit(0)
+            else:
+                print_error("No failed runs found in history")
+                console.print()
+                console.print("[dim]Tip: Use 'ragctl history list' to see all runs[/dim]")
+                raise typer.Exit(1)
 
         run_id = run.run_id
         console.print(f"[green]✓[/green] Found run: {run_id}")
@@ -101,7 +108,7 @@ def retry_command(
         if not run:
             print_error(f"Run not found: {run_id}")
             console.print()
-            console.print("[dim]Tip: Use 'atlas-rag history list' to see available runs[/dim]")
+            console.print("[dim]Tip: Use 'ragctl history list' to see available runs[/dim]")
             raise typer.Exit(1)
 
     # Get failed files
