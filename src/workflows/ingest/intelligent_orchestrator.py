@@ -460,7 +460,8 @@ class IntelligentDocumentOrchestrator:
                     metadata['extraction_strategy'] = 'fallback_pymupdf'
                     metadata['document_analysis'] = analysis.to_dict()
                     return docs, metadata
-                except Exception:
+                except Exception as fallback_error:
+                    LOGGER.warning(f"Final fallback to PyMuPDF failed: {fallback_error}")
                     pass
 
             raise

@@ -78,8 +78,12 @@ class StrategyScorerHF:
             state_dict = load_file(model_file_safetensors)
             model_file = model_file_safetensors
         elif os.path.exists(model_file_bin):
-            # Load from pytorch bin format
-            state_dict = torch.load(model_file_bin, map_location=self.device)
+            # Load from pytorch bin format (weights_only=True for security)
+            state_dict = torch.load(
+                model_file_bin,
+                map_location=self.device,
+                weights_only=True
+            )
             model_file = model_file_bin
         else:
             raise FileNotFoundError(

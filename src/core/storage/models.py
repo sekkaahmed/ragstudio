@@ -13,9 +13,9 @@ from typing import Optional, List
 
 from sqlalchemy import (
     Column, String, Integer, BigInteger, Float, Boolean, Text,
-    DateTime, ForeignKey, UniqueConstraint, Index
+    DateTime, ForeignKey, UniqueConstraint, Index, JSON
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -93,7 +93,7 @@ class Document(Base):
 
     # Additional metadata (JSON)
     # Note: Using 'extra_metadata' as attribute name because 'metadata' is reserved in SQLAlchemy
-    extra_metadata: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    extra_metadata: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
 
     # Relationships
     chunks: Mapped[List["Chunk"]] = relationship(
@@ -189,7 +189,7 @@ class Chunk(Base):
 
     # Additional metadata (JSON)
     # Note: Using 'extra_metadata' as attribute name because 'metadata' is reserved in SQLAlchemy
-    extra_metadata: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    extra_metadata: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
 
     # Relationships
     document: Mapped["Document"] = relationship(
@@ -262,7 +262,7 @@ class ExtractionJob(Base):
 
     # Additional metadata
     # Note: Using 'extra_metadata' as attribute name because 'metadata' is reserved in SQLAlchemy
-    extra_metadata: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    extra_metadata: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
@@ -321,7 +321,7 @@ class AuditLog(Base):
     user_id: Mapped[Optional[str]] = mapped_column(String(100))
 
     # Changes (before/after)
-    changes: Mapped[Optional[dict]] = mapped_column(JSONB)
+    changes: Mapped[Optional[dict]] = mapped_column(JSON)
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(
@@ -331,7 +331,7 @@ class AuditLog(Base):
 
     # Additional context
     # Note: Using 'extra_metadata' as attribute name because 'metadata' is reserved in SQLAlchemy
-    extra_metadata: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    extra_metadata: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
 
     # Table constraints
     __table_args__ = (

@@ -1,10 +1,23 @@
 """
-Redis Cache for Atlas-RAG
+Redis Cache for RAG Studio - OPTIONAL FEATURE (Currently Unused)
 
-Provides caching capabilities for:
-- Chunks (to avoid re-chunking same documents)
-- Embeddings (to avoid re-computing)
-- Search results (for common queries)
+⚠️ STATUS: This module is prepared but NOT currently integrated into the pipeline.
+Redis is an optional performance optimization that can be enabled in the future.
+
+The application works fully without Redis. This module provides a ready-to-use
+caching layer when you want to optimize performance for production workloads.
+
+FUTURE USE CASES:
+- Cache chunks (avoid re-chunking identical documents)
+- Cache embeddings (expensive GPU/API calls)
+- Cache search results (frequent queries)
+
+TO ENABLE:
+1. Install Redis: `brew install redis` or `docker run -d redis`
+2. Instantiate RedisCache in your pipeline
+3. Pass it to chunking/embedding functions
+
+CURRENT STATE: Code is present but never instantiated = 0% usage
 """
 
 import json
@@ -79,8 +92,8 @@ class RedisCache:
         """
         # Create a string representation of all arguments
         key_data = f"{args}:{sorted(kwargs.items())}"
-        # Hash it for consistent key length
-        key_hash = hashlib.md5(key_data.encode()).hexdigest()
+        # Hash it for consistent key length (not for security)
+        key_hash = hashlib.md5(key_data.encode(), usedforsecurity=False).hexdigest()
         return f"atlas:{prefix}:{key_hash}"
 
     def get(self, key: str) -> Optional[Any]:

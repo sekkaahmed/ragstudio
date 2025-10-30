@@ -230,9 +230,10 @@ class AtlasChunker:
 
             char_end = char_start + len(chunk_text)
 
-            # Generate deterministic ID
+            # Generate deterministic ID (not for security)
             chunk_id = hashlib.md5(
-                f"{document.source_path}:{idx}:{chunk_text[:100]}".encode()
+                f"{document.source_path}:{idx}:{chunk_text[:100]}".encode(),
+                usedforsecurity=False
             ).hexdigest()[:12]
 
             # Count sentences (approximate)
@@ -312,7 +313,7 @@ class AtlasChunker:
         # Check for exact duplicates
         seen_texts = set()
         for chunk in chunks:
-            text_hash = hashlib.md5(chunk.text.encode()).hexdigest()
+            text_hash = hashlib.md5(chunk.text.encode(), usedforsecurity=False).hexdigest()
             if text_hash in seen_texts:
                 issues.append(f"Duplicate chunk detected: {chunk.id}")
             seen_texts.add(text_hash)

@@ -1,7 +1,7 @@
 """
 Adaptive chunking powered by LangChain text splitters (v3.0).
 
-Replaces Chonkie with proper LangChain implementation.
+Pure LangChain implementation - Chonkie removed.
 """
 
 from __future__ import annotations
@@ -17,17 +17,6 @@ from src.workflows.ingest.pdf_cleaner import preprocess_before_chunking
 
 LOGGER = logging.getLogger(__name__)
 
-# Keep Chonkie as optional fallback for compatibility
-try:
-    from chonkie import TokenChunker, SentenceChunker, SemanticChunker  # type: ignore
-    CHONKIE_AVAILABLE = True
-except ImportError:  # pragma: no cover - fallback used when dependency missing
-    TokenChunker = None
-    SentenceChunker = None
-    SemanticChunker = None
-    CHONKIE_AVAILABLE = False
-    LOGGER.info("Chonkie not available, using LangChain exclusively")
-
 try:
     import tiktoken
 except ImportError:  # pragma: no cover
@@ -35,63 +24,6 @@ except ImportError:  # pragma: no cover
 
 
 DEFAULT_STRATEGY = chunking_config.strategy
-
-
-def _chunk_with_chonkie(
-    text: str,
-    *,
-    strategy: str,
-    max_tokens: int,
-    overlap: int,
-    model: str,
-) -> List[str]:
-    """
-    Use Chonkie library for advanced chunking strategies.
-
-    Supported strategies:
-    - semantic: Groups semantically similar sentences (best quality, slower)
-    - sentence: Splits on sentence boundaries (good quality, fast)
-    - token: Token-based splitting (basic, fastest)
-    - recursive: Hierarchical splitting (legacy, for compatibility)
-    """
-    if not CHONKIE_AVAILABLE:
-        raise ImportError("chonkie is not installed")
-
-    # Map strategy to appropriate Chonkie chunker
-    if strategy == "semantic":
-        if SemanticChunker is None:
-            raise ImportError("SemanticChunker not available")
-        LOGGER.info("Using SemanticChunker (best quality, requires embeddings)")
-        chunker = SemanticChunker(
-            chunk_size=max_tokens,
-            chunk_overlap=overlap,
-        )
-    elif strategy == "sentence":
-        if SentenceChunker is None:
-            raise ImportError("SentenceChunker not available")
-        LOGGER.info("Using SentenceChunker (good quality, fast)")
-        chunker = SentenceChunker(
-            chunk_size=max_tokens,
-            chunk_overlap=overlap,
-        )
-    elif strategy in ("token", "recursive", "late", "parent_child"):
-        # For backward compatibility, map other strategies to TokenChunker
-        if TokenChunker is None:
-            raise ImportError("TokenChunker not available")
-        LOGGER.info(f"Using TokenChunker for strategy '{strategy}'")
-        chunker = TokenChunker(
-            chunk_size=max_tokens,
-            chunk_overlap=overlap,
-        )
-    else:
-        raise ValueError(f"Unknown strategy: {strategy}. Use 'semantic', 'sentence', or 'token'")
-
-    result = chunker.chunk(text)
-    if not isinstance(result, list):
-        raise ValueError("Unexpected response from chonkie chunker")
-    if result and hasattr(result[0], "text"):
-        return [item.text for item in result]
-    return [str(item) for item in result]
 
 
 def _encoding_length(text: str, model: str) -> int:
@@ -166,18 +98,8 @@ def _chunk_parent_child(
         if not content.strip():
             continue
             
-        # Chunk the content of this section
-        try:
-            section_chunks = _chunk_with_chonkie(
-                content,
-                strategy="recursive",  # Use recursive for sub-sections
-                max_tokens=max_tokens,
-                overlap=overlap,
-                model=model,
-            )
-        except Exception as exc:
-            LOGGER.warning("Failed to chunk section %d, using fallback: %s", i, exc)
-            section_chunks = _chunk_fallback(content, max_tokens=max_tokens, overlap=overlap, model=model)
+        # Chunk the content of this section using fallback
+        section_chunks = _chunk_fallback(content, max_tokens=max_tokens, overlap=overlap, model=model)
         
         # Add heading context to each chunk
         for chunk_text in section_chunks:
@@ -278,16 +200,15 @@ def chunk_document_adaptive(
                 model=model,
             )
         else:
-            # Use existing chonkie strategies
-            chunk_texts = _chunk_with_chonkie(
+            # Use fallback chunker (LangChain is primary in chunk_document)
+            chunk_texts = _chunk_fallback(
                 document.text,
-                strategy=strategy,
                 max_tokens=max_tokens,
                 overlap=overlap,
                 model=model,
             )
     except Exception as exc:  # pragma: no cover - graceful degradation
-        LOGGER.warning("Falling back to heuristic chunker: %s", exc)
+        LOGGER.warning("Fallback chunker failed: %s", exc)
         chunk_texts = _chunk_fallback(
             document.text,
             max_tokens=max_tokens,
@@ -373,27 +294,8 @@ def chunk_document(
     except Exception as exc:  # pragma: no cover - fallback
         LOGGER.warning(f"LangChain chunking failed: {exc}")
 
-        # Fallback 1: Try Chonkie if available
-        if CHONKIE_AVAILABLE:
-            LOGGER.info("Falling back to Chonkie")
-            try:
-                text_to_chunk = document.text
-                if clean_pdf:
-                    text_to_chunk = preprocess_before_chunking(document.text, source_type="pdf")
-
-                chunk_texts = _chunk_with_chonkie(
-                    text_to_chunk,
-                    strategy=strategy,
-                    max_tokens=max_tokens,
-                    overlap=overlap,
-                    model=model,
-                )
-                return make_chunks(document, chunk_texts, additional_metadata=additional_metadata)
-            except Exception as e2:
-                LOGGER.warning(f"Chonkie fallback failed: {e2}")
-
-        # Fallback 2: Heuristic chunker
-        LOGGER.warning("Using heuristic fallback chunker")
+        # Fallback: Use simple token-based chunker
+        LOGGER.warning("Using token-based fallback chunker")
         text_to_chunk = document.text
         if clean_pdf:
             text_to_chunk = preprocess_before_chunking(document.text, source_type="pdf")

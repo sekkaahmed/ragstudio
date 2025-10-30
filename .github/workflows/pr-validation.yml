@@ -21,6 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install --upgrade "pip>=25.3"
           pip install ruff black flake8 mypy
           pip install -e .
 
@@ -66,7 +67,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
+          pip install --upgrade "pip>=25.3"
           pip install pytest pytest-cov pytest-mock
           pip install -e .
 
@@ -89,11 +90,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Gitleaks Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+      # Gitleaks removed - requires paid license for organizations
+      # TruffleHog provides similar functionality for free
 
       - name: TruffleHog Scan
         uses: trufflesecurity/trufflehog@main
@@ -113,6 +111,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install --upgrade "pip>=25.3"
           pip install bandit semgrep
           pip install -e .
 
@@ -151,7 +150,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install safety pip-audit snyk
+          pip install --upgrade "pip>=25.3"
+          pip install safety pip-audit
           pip install -e .
 
       - name: Safety Check (PyPI vulnerabilities)
@@ -185,14 +185,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: moderate
+      # Dependency Review disabled - requires GitHub Advanced Security for private repos
+      # Re-enable when repo is public or Advanced Security is enabled
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
@@ -219,6 +216,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install --upgrade "pip>=25.3"
           pip install pip-licenses licensecheck
           pip install -e .
 
@@ -266,6 +264,9 @@ jobs:
   trivy-scan:
     name: Trivy Vulnerability Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required for uploading SARIF results to CodeQL
     steps:
       - uses: actions/checkout@v4
 
@@ -278,11 +279,19 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH,MEDIUM'
 
-      - name: Upload Trivy results
+      - name: Upload Trivy results to CodeQL
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        # Skip upload for forks (no permissions) - keep local artifact
+        if: always() && github.event.pull_request.head.repo.full_name == github.repository
         with:
           sarif_file: 'trivy-results.sarif'
+
+      - name: Upload Trivy results as artifact (for forks)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-results
+          path: trivy-results.sarif
 
       - name: Trivy Summary
         uses: aquasecurity/trivy-action@master
@@ -305,6 +314,7 @@ jobs:
 
       - name: Install build tools
         run: |
+          pip install --upgrade "pip>=25.3"
           pip install build twine
 
       - name: Build package
