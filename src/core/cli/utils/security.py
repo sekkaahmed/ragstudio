@@ -17,7 +17,7 @@ import os
 import shutil
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 from dataclasses import dataclass
 
 import typer
@@ -151,22 +151,26 @@ def validate_path_safe(
 
 
 def validate_no_symlinks(
-    file_path: Path,
+    file_path: Union[str, Path],
     config: Optional[SecurityConfig] = None
 ) -> Path:
     """
     Validate that a file is not a symbolic link.
 
     Args:
-        file_path: Path to validate
+        file_path: Path to validate (str or Path object)
         config: Security configuration (uses global if None)
 
     Returns:
-        Validated file_path
+        Validated file_path as Path object
 
     Raises:
         typer.BadParameter: If path is a symlink and symlinks are not allowed
     """
+    # Convert str to Path if necessary
+    if isinstance(file_path, str):
+        file_path = Path(file_path)
+
     if config is None:
         config = get_security_config()
 

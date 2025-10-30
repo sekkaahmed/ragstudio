@@ -374,9 +374,9 @@ class ChunksJSONExporter:
                 name = name.replace(' ', '_').replace('/', '_')
                 return name
 
-        # Fallback: use hash of document info
+        # Fallback: use hash of document info (not for security)
         info_str = json.dumps(document_info, sort_keys=True)
-        hash_str = hashlib.md5(info_str.encode()).hexdigest()[:8]
+        hash_str = hashlib.md5(info_str.encode(), usedforsecurity=False).hexdigest()[:8]
         return f"doc_{hash_str}"
 
     def get_statistics(self) -> Dict[str, Any]:
@@ -390,7 +390,9 @@ class ChunksJSONExporter:
                 with open(file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     total_chunks += data.get('num_chunks', 0)
-            except Exception:
+            except Exception as e:
+                # Skip corrupted or invalid JSON files in stats
+                LOGGER.debug(f"Skipping invalid JSON file {file.name}: {e}")
                 pass
 
         return {

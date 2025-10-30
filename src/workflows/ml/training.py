@@ -94,8 +94,9 @@ def load_strategy_dataset(data_file: str = "data/strategy_samples.jsonl") -> Dat
     
     if not os.path.exists(data_file):
         raise FileNotFoundError(f"Dataset file not found: {data_file}")
-    
-    dataset = load_dataset("json", data_files=data_file, split="train")
+
+    # Loading from local JSON file, not downloading from Hub
+    dataset = load_dataset("json", data_files=data_file, split="train")  # nosec B615
     LOGGER.info("Loaded %d samples from dataset", len(dataset))
     
     return dataset

@@ -81,6 +81,10 @@ dependencies = [
     "typer[all]>=0.12.0",  # Modern CLI framework
     "rich>=13.0.0",  # Beautiful CLI output
 
+    # Vector Database
+    "qdrant-client>=1.7.0",  # Vector database for embeddings storage
+    "langchain-qdrant>=0.1.0",  # LangChain Qdrant integration
+
     # Utilities
     "psutil>=5.9.0",  # System utilities
     "requests>=2.31.0",  # HTTP client
@@ -146,6 +150,12 @@ addopts = [
     "--strict-config",
     "--showlocals",
     "-ra",
+    "--cov=src/core",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml:coverage.xml",
+    "--cov-branch",
+    "--cov-fail-under=17",
 ]
 markers = [
     "unit: Unit tests",
@@ -157,7 +167,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src/core"]
 omit = [
     "*/tests/*",
     "*/__pycache__/*",

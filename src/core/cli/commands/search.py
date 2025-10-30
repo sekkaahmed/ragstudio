@@ -53,16 +53,16 @@ def search_command(
     \b
     Examples:
         # Basic search
-        atlas-rag search "machine learning applications"
+        ragctl search "machine learning applications"
 
         # Search with more results
-        atlas-rag search "deep learning" --top-k 10
+        ragctl search "deep learning" --top-k 10
 
         # Search with score threshold
-        atlas-rag search "neural networks" --threshold 0.7
+        ragctl search "neural networks" --threshold 0.7
 
         # Search with custom API URL
-        atlas-rag search "transformers" --api-url http://192.168.1.100:8000
+        ragctl search "transformers" --api-url http://192.168.1.100:8000
     """
     # Check API health
     try:

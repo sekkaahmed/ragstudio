@@ -1,7 +1,7 @@
 """
 Metadata Store API for Atlas-RAG.
 
-Provides high-level interface for interacting with PostgreSQL metadata store.
+Provides high-level interface for interacting with SQL metadata store (SQLite).
 """
 
 from __future__ import annotations
@@ -10,7 +10,7 @@ import hashlib
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from contextlib import contextmanager
 
 from sqlalchemy import create_engine, select, func, and_, or_
@@ -32,7 +32,7 @@ class MetadataStore:
     """
     High-level API for metadata store operations.
 
-    Manages documents, chunks, jobs, and audit logs in PostgreSQL.
+    Manages documents, chunks, jobs, and audit logs in SQLite database.
     """
 
     def __init__(self, database_url: str):
@@ -40,8 +40,8 @@ class MetadataStore:
         Initialize metadata store.
 
         Args:
-            database_url: PostgreSQL connection string
-                Example: 'postgresql://user:password@localhost:5432/atlas_rag_metadata'
+            database_url: SQLite connection string
+                Example: 'sqlite:///atlas_rag_metadata.db' or 'sqlite:///:memory:' for in-memory
         """
         self.engine = create_engine(
             database_url,
@@ -128,15 +128,20 @@ class MetadataStore:
 
             session.add(doc)
             session.flush()  # Get ID
+            session.refresh(doc)  # Load all attributes before detaching
 
             LOGGER.info(f"Created document: {doc.filename} (id={doc.id})")
+            session.expunge(doc)  # Detach from session to avoid DetachedInstanceError
             return doc
 
     def get_document(self, document_id: str) -> Optional[Document]:
         """Get document by ID."""
         with self.get_session() as session:
             stmt = select(Document).where(Document.id == document_id)
-            return session.scalar(stmt)
+            doc = session.scalar(stmt)
+            if doc:
+                session.expunge(doc)
+            return doc
 
     def get_document_by_filename(self, filename: str) -> Optional[Document]:
         """Get document by filename (latest version)."""
@@ -144,7 +149,10 @@ class MetadataStore:
             stmt = select(Document).where(
                 Document.filename == filename
             ).order_by(Document.version.desc())
-            return session.scalar(stmt)
+            doc = session.scalar(stmt)
+            if doc:
+                session.expunge(doc)
+            return doc
 
     def get_document_by_hash(self, file_hash: str) -> Optional[Document]:
         """Get document by file hash (latest version)."""
@@ -152,7 +160,10 @@ class MetadataStore:
             stmt = select(Document).where(
                 Document.file_hash == file_hash
             ).order_by(Document.version.desc())
-            return session.scalar(stmt)
+            doc = session.scalar(stmt)
+            if doc:
+                session.expunge(doc)
+            return doc
 
     def update_document(
         self,
@@ -179,6 +190,8 @@ class MetadataStore:
                     setattr(doc, key, value)
 
             session.flush()
+            session.refresh(doc)
+            session.expunge(doc)
             LOGGER.info(f"Updated document {document_id}: {kwargs}")
             return doc
 
@@ -197,7 +210,7 @@ class MetadataStore:
         status: Optional[str] = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[Document]:
+    ) -> Tuple[List[Document], int]:
         """
         List documents with optional filtering.
 
@@ -207,18 +220,26 @@ class MetadataStore:
             offset: Offset for pagination
 
         Returns:
-            List of Document instances
+            Tuple of (List of Document instances, total count)
         """
         with self.get_session() as session:
-            stmt = select(Document)
+            # Count query (without limit/offset)
+            count_stmt = select(func.count(Document.id))
+            if status:
+                count_stmt = count_stmt.where(Document.status == status)
+            total = session.scalar(count_stmt) or 0
 
+            # Data query (with limit/offset)
+            stmt = select(Document)
             if status:
                 stmt = stmt.where(Document.status == status)
-
             stmt = stmt.order_by(Document.created_at.desc())
             stmt = stmt.limit(limit).offset(offset)
 
-            return list(session.scalars(stmt))
+            docs = list(session.scalars(stmt))
+            for doc in docs:
+                session.expunge(doc)
+            return docs, total
 
     # =========================================================================
     # Chunk Operations
@@ -258,6 +279,8 @@ class MetadataStore:
 
             session.add(chunk)
             session.flush()
+            session.refresh(chunk)
+            session.expunge(chunk)
 
             LOGGER.debug(f"Created chunk {chunk_index} for document {document_id}")
             return chunk
@@ -294,6 +317,9 @@ class MetadataStore:
 
             session.add_all(chunks)
             session.flush()
+            for chunk in chunks:
+                session.refresh(chunk)
+                session.expunge(chunk)
 
             LOGGER.info(f"Created {len(chunks)} chunks for document {document_id}")
             return chunks
@@ -301,7 +327,10 @@ class MetadataStore:
     def get_chunk(self, chunk_id: str) -> Optional[Chunk]:
         """Get chunk by ID."""
         with self.get_session() as session:
-            return session.get(Chunk, chunk_id)
+            chunk = session.get(Chunk, chunk_id)
+            if chunk:
+                session.expunge(chunk)
+            return chunk
 
     def get_chunks_by_document(
         self,
@@ -317,22 +346,30 @@ class MetadataStore:
             if limit:
                 stmt = stmt.limit(limit)
 
-            return list(session.scalars(stmt))
+            chunks = list(session.scalars(stmt))
+            for chunk in chunks:
+                session.expunge(chunk)
+            return chunks
 
     def update_chunk_vector_id(
         self,
         chunk_id: str,
         vector_id: str,
-        embedding_model: str
-    ):
+        embedding_model: Optional[str] = None
+    ) -> Optional[Chunk]:
         """Update chunk with vector store reference."""
         with self.get_session() as session:
             chunk = session.get(Chunk, chunk_id)
             if chunk:
                 chunk.vector_id = vector_id
-                chunk.embedding_model = embedding_model
+                if embedding_model:
+                    chunk.embedding_model = embedding_model
                 session.flush()
+                session.refresh(chunk)
                 LOGGER.debug(f"Updated chunk {chunk_id} with vector_id {vector_id}")
+                session.expunge(chunk)
+                return chunk
+            return None
 
     # =========================================================================
     # Extraction Job Operations
@@ -364,6 +401,8 @@ class MetadataStore:
 
             session.add(job)
             session.flush()
+            session.refresh(job)
+            session.expunge(job)
 
             LOGGER.info(f"Created job {job.id} (type={job_type}) for document {document_id}")
             return job
@@ -454,6 +493,8 @@ class MetadataStore:
 
             session.add(log)
             session.flush()
+            session.refresh(log)
+            session.expunge(log)
 
             return log
 
@@ -464,14 +505,16 @@ class MetadataStore:
     def get_statistics(self) -> Dict[str, Any]:
         """Get overall system statistics."""
         with self.get_session() as session:
-            total_docs = session.scalar(select(func.count(Document.id)))
+            total_docs = session.scalar(select(func.count(Document.id))) or 0
             done_docs = session.scalar(
                 select(func.count(Document.id)).where(Document.status == 'done')
-            )
+            ) or 0
             failed_docs = session.scalar(
                 select(func.count(Document.id)).where(Document.status == 'failed')
-            )
-            total_chunks = session.scalar(select(func.count(Chunk.id)))
+            ) or 0
+            total_chunks = session.scalar(select(func.count(Chunk.id))) or 0
+            total_jobs = session.scalar(select(func.count(ExtractionJob.id))) or 0
+            total_audit_logs = session.scalar(select(func.count(AuditLog.id))) or 0
 
             success_rate = (done_docs / total_docs * 100) if total_docs > 0 else 0
 
@@ -480,6 +523,8 @@ class MetadataStore:
                 'successful_documents': done_docs,
                 'failed_documents': failed_docs,
                 'total_chunks': total_chunks,
+                'total_jobs': total_jobs,
+                'total_audit_logs': total_audit_logs,
                 'success_rate': round(success_rate, 2),
             }
 
@@ -506,7 +551,7 @@ def get_metadata_store(database_url: Optional[str] = None) -> MetadataStore:
     Get or create metadata store singleton instance.
 
     Args:
-        database_url: PostgreSQL connection string (required on first call)
+        database_url: SQLite connection string (required on first call)
 
     Returns:
         MetadataStore instance

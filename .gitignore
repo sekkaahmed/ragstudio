@@ -227,3 +227,8 @@ STRUCTURE.txt
 # Archives (already cleaned up)
 .archive/
 archive/
+
+# Local archive for documentation
+.archive/
+test_data/
+test_output/

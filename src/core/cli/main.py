@@ -10,7 +10,7 @@ from src.core.cli.app import app
 
 
 def main():
-    """Main entry point for atlas-rag CLI."""
+    """Main entry point for ragctl CLI."""
     app()
 
 
