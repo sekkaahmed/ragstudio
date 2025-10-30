@@ -4,11 +4,11 @@
 
 Process documents, extract text with advanced OCR, chunk intelligently, and prepare data for RAG systems - all from the command line with `ragctl`.
 
-[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](https://github.com/horiz-data/ragstudio)
+[![Version](https://img.shields.io/badge/version-0.1.3-blue.svg)](https://github.com/horiz-data/ragstudio)
 [![PyPI](https://img.shields.io/badge/pypi-ragctl-blue.svg)](https://pypi.org/project/ragctl/)
 [![Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/horiz-data/ragstudio)
-[![Tests](https://img.shields.io/badge/tests-129%20passed-success.svg)](https://github.com/horiz-data/ragstudio)
-[![Coverage](https://img.shields.io/badge/coverage-96%25-success.svg)](https://github.com/horiz-data/ragstudio)
+[![Tests](https://img.shields.io/badge/tests-496%20passed-success.svg)](https://github.com/horiz-data/ragstudio)
+[![Coverage](https://img.shields.io/badge/coverage-41%25-yellow.svg)](https://github.com/horiz-data/ragstudio)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 
